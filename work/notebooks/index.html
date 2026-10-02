@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Pages to Fix First: A Content Refresh Scoring Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1c1f26;
+    --ink-soft: #4a5160;
+    --paper: #faf9f6;
+    --paper-raised: #f1efe9;
+    --accent: #2f6f62;
+    --line: #ddd8cc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, sans-serif;
+    line-height: 1.6;
+    font-size: 17px;
+  }
+  h1, h2, h3 { font-family: 'Source Serif 4', Georgia, serif; font-weight: 700; color: var(--ink); line-height: 1.25; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  header.hero {
+    border-bottom: 1px solid var(--line);
+    padding: 72px 0 48px;
+  }
+  .kicker { color: var(--accent); font-weight: 600; font-size: 0.95rem; margin-bottom: 14px; }
+  h1 { font-size: 2.4rem; margin: 0 0 18px; max-width: 18ch; }
+  .byline { color: var(--ink-soft); font-size: 1rem; }
+  .byline a { color: var(--accent); }
+  section { padding: 44px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  h2 { font-size: 1.55rem; margin: 0 0 18px; }
+  h3 { font-size: 1.15rem; margin: 28px 0 10px; }
+  p { margin: 0 0 16px; max-width: 72ch; }
+  .abstract { background: var(--paper-raised); padding: 28px 28px; border-left: 3px solid var(--accent); margin-top: 8px; }
+  .abstract p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0 24px; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+  th { font-weight: 600; color: var(--ink-soft); font-size: 0.85rem; }
+  .bar-row { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+  .bar-label { width: 190px; font-size: 0.9rem; color: var(--ink-soft); flex-shrink: 0; }
+  .bar-track { flex: 1; background: var(--paper-raised); border-radius: 3px; overflow: hidden; height: 22px; position: relative; }
+  .bar-fill { background: var(--accent); height: 100%; display: flex; align-items: center; }
+  .bar-fill.light { background: #9bb8b0; }
+  .bar-val { font-size: 0.85rem; color: #fff; padding-left: 8px; font-weight: 600; }
+  ul, ol { padding-left: 22px; margin: 0 0 16px; }
+  li { margin-bottom: 8px; }
+  .reco { background: var(--paper-raised); padding: 16px 18px; border-radius: 4px; margin-bottom: 12px; }
+  .reco .num { color: var(--accent); font-weight: 600; }
+  code { background: var(--paper-raised); padding: 1px 6px; border-radius: 3px; font-size: 0.9em; }
+  .repro-list a { display: block; color: var(--accent); text-decoration: none; padding: 6px 0; border-bottom: 1px dotted var(--line); }
+  .repro-list a:hover { text-decoration: underline; }
+  footer { padding: 36px 0 72px; color: var(--ink-soft); font-size: 0.95rem; }
+  footer a { color: var(--accent); }
+  .note { font-size: 0.9rem; color: var(--ink-soft); font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">FlyRank ML Internship Capstone</div>
+    <h1>Which Pages to Fix First: A Content Refresh Scoring Model</h1>
+    <p class="byline">By J. Aamir &middot; <a href="https://github.com/J-Aamir/Capstone-Flyrank">Repository on GitHub</a></p>
+  </header>
+
+  <section id="abstract">
+    <h2>Abstract</h2>
+    <div class="abstract">
+      <p>
+        This is a case study built on a real content problem FlyRank's clients face: a company with thousands of web pages can only afford to review a small number each week, so the real question is which pages to look at first. We built a model that ranks pages by how likely they are to be losing search visibility, using a starter dataset of 30,000 anonymized pages across 32 FlyRank clients. We compared a simple hand written rule against a Random Forest classifier, tested honestly on clients the model had never seen during training. The model reached a Precision at 50 of 0.74, compared to 0.58 for the rule, meaning that out of the top 50 flagged pages, about 37 were genuinely declining instead of about 29. We report this as a decision support tool for a human editor, not a guarantee, and we show exactly where the model gets things wrong.
+      </p>
+    </div>
+  </section>
+
+  <section id="intro">
+    <h2>Introduction</h2>
+    <p>
+      This paper is a case study built around a real problem FlyRank's clients face every week. FlyRank manages content for dozens of brands, and each brand has far more pages than any editorial team can personally review. A page that was written well a year ago can quietly lose visitors as competitors publish newer content, as Google changes how it ranks results, or as a page simply goes stale. The team that owns these pages usually has the resources to refresh maybe twenty to fifty pages a week, so the actual decision they face every week is not "is this page good or bad," it is "which pages do we touch first."
+    </p>
+    <p>
+      Right now this decision is often made with a hand written rule, something like "flag any page that has not been updated in six months and still gets meaningful traffic." We tested that kind of rule directly on FlyRank's own anonymized client data and found it only flagged 17 pages out of 30,000, far too narrow a list for a real editorial team to work from. That gap between what the simple rule catches and what the data actually shows is the real content problem this paper tries to solve. The rest of this paper asks whether a trained model, built honestly and validated carefully, can do better than that rule without quietly cheating in the process, and what a FlyRank editor would actually see if they used it.
+    </p>
+  </section>
+
+  <section id="data">
+    <h2>Data</h2>
+    <p>
+      We used the starter release from the FlyRank ML Internship dataset: 30,000 anonymized content pages across 32 clients, each with 44 columns of trailing 90 day search and analytics metrics. Every page and client identifier is pseudonymized. No client names, URLs, or private queries appear anywhere in this paper or in the underlying notebooks.
+    </p>
+    <p>
+      We also had access to a larger hosted warehouse release with close to 79 million daily rows, which we queried directly for an earlier data contract exercise, but the model in this paper is trained and validated on the 30,000 row starter release for consistency across our weekly checkpoints.
+    </p>
+    <h3>What we excluded, and why</h3>
+    <ul>
+      <li><code>trend_direction</code> and <code>trend_pct</code>: these columns define our label. Including them as features would let the model simply look up the answer instead of predicting it.</li>
+      <li>Rows where <code>avg_position</code> equals zero: in this dataset a zero means no ranking data was recorded, not that the page ranked first. We filtered these out of any position based calculation.</li>
+      <li>Any client or page identifying text: all analysis uses the pseudonymized IDs only.</li>
+    </ul>
+  </section>
+
+  <section id="methodology">
+    <h2>Methodology</h2>
+    <h3>The label</h3>
+    <p>
+      We defined a page as declining if its impressions fell by 20 percent or more compared to the prior 30 day window, which matches the dataset's own <code>trend_direction</code> field. This is a proxy built from a current window comparison, not an independently measured future outcome, and we are careful to describe it that way throughout.
+    </p>
+    <h3>The baseline</h3>
+    <p>
+      Our baseline is a simple rule: flag a page if its click through rate falls meaningfully below the average click through rate for other pages ranking at a similar position, weighted by how many impressions that page already gets. We call this reason code <code>ctr_below_position_benchmark</code>, and the suggested action is to review the page's title and meta description.
+    </p>
+    <h3>The model</h3>
+    <p>
+      We trained a Random Forest classifier on seven features that are all knowable before the fact: content age, days since the last update, impressions, average position, click through rate, word count, and search volume. We deliberately left out anything derived from the label itself.
+    </p>
+    <h3>Validation design</h3>
+    <p>
+      We split the data by client rather than by row, so that no client's pages appear in both the training set and the test set. This matters a great deal. When we tested the same model under a naive row random split, where clients leaked freely between train and test, Precision at 50 looked artificially high at 0.92. Once we corrected the split so that 31 of 32 clients no longer overlapped between train and test, the honest number dropped to 0.74. We report only the client grouped number in our results.
+    </p>
+    <h3>Leakage check</h3>
+    <p>
+      We confirmed that none of our seven features overlap with the two columns that define the label, and we checked that no single feature carries a suspiciously high correlation with the label that would suggest a hidden shortcut. None did.
+    </p>
+  </section>
+
+  <section id="results">
+    <h2>Results</h2>
+    <p>Model versus baseline, same client grouped test split, same metric.</p>
+    <table>
+      <tr><th>k</th><th>Baseline rule</th><th>Random Forest</th></tr>
+      <tr><td>20</td><td>0.550</td><td>0.700</td></tr>
+      <tr><td>50</td><td>0.580</td><td>0.740</td></tr>
+    </table>
+
+    <div class="bar-row">
+      <div class="bar-label">Baseline @50</div>
+      <div class="bar-track"><div class="bar-fill light" style="width:58%"><span class="bar-val">0.58</span></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Random Forest @50</div>
+      <div class="bar-track"><div class="bar-fill" style="width:74%"><span class="bar-val">0.74</span></div></div>
+    </div>
+
+    <h3>Where the model gets it wrong</h3>
+    <p>
+      Looking at the model's actual top 20 picks on held out data, every single false positive was a young page currently labeled stable, not declining. The two features the model leans on most are content age and impressions, and it appears to over apply the general pattern that younger pages decline more often, flagging some young pages that have not actually started declining yet. This is a real and specific weakness, not just a number on a chart.
+    </p>
+  </section>
+
+  <section id="limitations">
+    <h2>Limitations and honest framing</h2>
+    <ul>
+      <li>This is an observational, correlational study. Nothing here proves that refreshing a page causes it to recover, only that certain page characteristics are associated with decline in this dataset.</li>
+      <li>The label is a proxy built from a 30 day impressions comparison, not a verified future outcome. A page labeled declining today could recover on its own regardless of any action taken.</li>
+      <li>The model was trained and validated on 32 clients. We have not tested how it performs on a brand new client or a different industry, and we would expect some drop in accuracy there until it is retrained or revalidated.</li>
+      <li>A Precision at 50 of 0.74 means roughly one in four of the top flagged pages will not actually be declining. This is a decision support signal for a human reviewer, not an automated judgment.</li>
+    </ul>
+  </section>
+
+  <section id="recommendations">
+    <h2>Ranked recommendations</h2>
+    <p>Our action playbook maps each page to one of four reason codes.</p>
+    <div class="reco"><span class="num">1.</span> <strong>High decline risk and CTR gap</strong> &mdash; refresh the content and review the title and snippet together. These pages carry both a model flagged decline risk and a click through rate well below what similar pages earn.</div>
+    <div class="reco"><span class="num">2.</span> <strong>High decline risk only</strong> &mdash; refresh the content. Click performance is fine, but the broader pattern suggests the page is losing ground.</div>
+    <div class="reco"><span class="num">3.</span> <strong>CTR gap only</strong> &mdash; review the title and meta description. Decline risk is low, but the page is underperforming for its search position.</div>
+    <div class="reco"><span class="num">4.</span> <strong>Low priority</strong> &mdash; monitor only, no action needed this cycle.</div>
+    <p class="note">A human should always check the underlying numbers for a flagged page before acting, and nothing here should be used to judge an individual writer or editor's performance.</p>
+  </section>
+
+  <section id="reproducibility">
+    <h2>Reproducibility</h2>
+    <p>Every step in this paper traces back to a notebook in the project repository. All notebooks run top to bottom from a fresh clone.</p>
+    <div class="repro-list">
+      <a href="https://github.com/J-Aamir/Capstone-Flyrank/blob/main/work/notebooks/w01_research_question.ipynb">w01 &middot; Research question and lane selection</a>
+      <a href="https://github.com/J-Aamir/Capstone-Flyrank/blob/main/work/notebooks/w02_ml_task_framing.ipynb">w02 &middot; ML task framing</a>
+      <a href="https://github.com/J-Aamir/Capstone-Flyrank/blob/main/work/notebooks/w03_data_contract.ipynb">w03 &middot; Data contract and warehouse verification</a>
+      <a href="https://github.com/J-Aamir/Capstone-Flyrank/blob/main/work/notebooks/w04_baseline_score.ipynb">w04 &middot; Baseline rule and signal audit</a>
+      <a href="https://github.com/J-Aamir/Capstone-Flyrank/blob/main/work/notebooks/w05_model.ipynb">w05 &middot; Model training and comparison</a>
+      <a href="https://github.com/J-Aamir/Capstone-Flyrank/blob/main/work/notebooks/w06_validation_audit.ipynb">w06 &middot; Validation and leakage audit</a>
+      <a href="https://github.com/J-Aamir/Capstone-Flyrank/blob/main/work/notebooks/w07_action_playbook.ipynb">w07 &middot; Action playbook and exports</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>Built on the FlyRank ML Internship dataset. Data courtesy of <a href="https://flyrank.ai">FlyRank</a>.</p>
+  </footer>
+</div>
+
+</body>
+</html>
