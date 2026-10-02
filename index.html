@@ -69,14 +69,14 @@
   <header class="hero">
     <div class="kicker">FlyRank ML Internship Capstone</div>
     <h1>Which Pages to Fix First: A Content Refresh Scoring Model</h1>
-    <p class="byline">By Javeria Aamir &middot; <a href="https://github.com/J-Aamir/Capstone-Flyrank">Repository on GitHub</a></p>
+    <p class="byline">By J. Aamir &middot; <a href="https://github.com/J-Aamir/Capstone-Flyrank">Repository on GitHub</a></p>
   </header>
 
   <section id="abstract">
     <h2>Abstract</h2>
     <div class="abstract">
       <p>
-        A company with thousands of web pages can only afford to review a small number each week, so the real question is which pages to look at first. We built a model that ranks pages by how likely they are to be losing search visibility, using a public starter dataset of 30,000 anonymized pages across 32 clients. We compared a simple hand written rule against a Random Forest classifier, tested honestly on clients the model had never seen during training. The model reached a Precision at 50 of 0.74, compared to 0.58 for the rule, meaning that out of the top 50 flagged pages, about 37 were genuinely declining instead of about 29. We report this as a decision support tool for a human editor, not a guarantee, and we show exactly where the model gets things wrong.
+        This is a case study built on a real content problem FlyRank's clients face: a company with thousands of web pages can only afford to review a small number each week, so the real question is which pages to look at first. We built a model that ranks pages by how likely they are to be losing search visibility, using a starter dataset of 30,000 anonymized pages across 32 FlyRank clients. We compared a simple hand written rule against a Random Forest classifier, tested honestly on clients the model had never seen during training. The model reached a Precision at 50 of 0.74, compared to 0.58 for the rule, meaning that out of the top 50 flagged pages, about 37 were genuinely declining instead of about 29. We report this as a decision support tool for a human editor, not a guarantee, and we show exactly where the model gets things wrong.
       </p>
     </div>
   </section>
@@ -84,10 +84,10 @@
   <section id="intro">
     <h2>Introduction</h2>
     <p>
-      SEO teams manage far more pages than they can personally review. A page that was written well a year ago can quietly lose visitors as competitors publish newer content, as Google changes how it ranks results, or as a page simply goes stale. The team that owns these pages usually has the resources to refresh maybe twenty to fifty pages a week, so the actual decision they face every week is not "is this page good or bad," it is "which pages do we touch first."
+      This paper is a case study built around a real problem FlyRank's clients face every week. FlyRank manages content for dozens of brands, and each brand has far more pages than any editorial team can personally review. A page that was written well a year ago can quietly lose visitors as competitors publish newer content, as Google changes how it ranks results, or as a page simply goes stale. The team that owns these pages usually has the resources to refresh maybe twenty to fifty pages a week, so the actual decision they face every week is not "is this page good or bad," it is "which pages do we touch first."
     </p>
     <p>
-      Right now this decision is often made with a hand written rule, something like "flag any page that has not been updated in six months and still gets meaningful traffic." We tested that kind of rule directly on real data and found it only flagged 17 pages out of 30,000, far too narrow a list for a real editorial team to work from. This paper asks whether a trained model, built honestly and validated carefully, can do better than that rule without quietly cheating in the process.
+      Right now this decision is often made with a hand written rule, something like "flag any page that has not been updated in six months and still gets meaningful traffic." We tested that kind of rule directly on FlyRank's own anonymized client data and found it only flagged 17 pages out of 30,000, far too narrow a list for a real editorial team to work from. That gap between what the simple rule catches and what the data actually shows is the real content problem this paper tries to solve. The rest of this paper asks whether a trained model, built honestly and validated carefully, can do better than that rule without quietly cheating in the process, and what a FlyRank editor would actually see if they used it.
     </p>
   </section>
 
